@@ -1,0 +1,471 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>لوحة التحكم | Radwa Mohamed</title>
+  <script src="assets/theme-init.js"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700&family=Playfair+Display:wght@600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.rtl.min.css" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" />
+  <link rel="stylesheet" href="assets/theme.css" />
+
+  <style>
+    /* SIDEBAR REDESIGN */
+    .sidebar {
+      width: 280px;
+      height: 100vh;
+      position: fixed;
+      top: 0; right: 0;
+      z-index: 1000;
+      transition: transform 0.4s var(--ease-luxury);
+      padding: 2rem 0;
+      display: flex;
+      flex-direction: column;
+    }
+    
+    .sidebar-brand {
+      padding: 0 2rem 2rem;
+      border-bottom: 1px solid var(--glass-border);
+    }
+    
+    .nav-item {
+      padding: 1rem 2rem;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      text-decoration: none;
+      border-right: 4px solid transparent;
+      transition: all 0.3s;
+    }
+    
+    .main {
+      margin-right: 280px;
+      padding: 3rem;
+      transition: margin 0.4s var(--ease-luxury);
+    }
+    
+    /* MOBILE RESPONSIVE SIDEBAR FIX */
+    @media (max-width: 1024px) {
+      .sidebar {
+        transform: translateX(100%); /* Hidden by default on mobile */
+      }
+      .sidebar.open {
+        transform: translateX(0);
+      }
+      .main {
+        margin-right: 0;
+        padding: 6rem 1.5rem 2rem;
+      }
+      .mobile-topbar {
+        display: flex !important;
+        position: fixed;
+        top: 0; left: 0; right: 0;
+        height: 70px;
+        align-items: center;
+        padding: 0 1.5rem;
+        z-index: 900;
+      }
+    }
+    
+    .mobile-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.2);
+      backdrop-filter: blur(4px);
+      z-index: 950;
+      display: none;
+    }
+    .mobile-overlay.open { display: block; }
+    
+    /* Stat Cards */
+    .stat-card { padding: 2rem; display: flex; align-items: center; gap: 1.5rem; }
+    .stat-icon { width: 60px; height: 60px; border-radius: 15px; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; }
+    .stat-num { font-size: 2.5rem; }
+    
+    /* Table Styling */
+    .recent-table th { padding: 1.2rem; border-bottom: 2px solid var(--gold-100); }
+    .recent-table td { padding: 1.2rem; vertical-align: middle; }
+    
+    /* Form Panels */
+    .panel { padding: 2.5rem; margin-bottom: 2rem; }
+    .panel-title { margin-bottom: 2rem; font-size: 1.5rem; }
+    
+    #auth-gate {
+      position: fixed; inset: 0;
+      background: var(--pearl-bg);
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      z-index: 9999;
+    }
+  </style>
+</head>
+<body>
+
+<!-- Auth Gate -->
+<div id="auth-gate">
+  <div class="spinner-border text-warning mb-3" style="width: 3rem; height: 3rem;" role="status"></div>
+  <h4 class="text-muted">جارٍ تأمين وصولك...</h4>
+</div>
+
+<!-- ── MOBILE TOPBAR ── -->
+<nav class="mobile-topbar" id="mobile-topbar" style="display:none">
+  <button class="btn border-0 fs-2" onclick="toggleSidebar()" style="color:var(--gold-500)">
+    <i class="bi bi-list"></i>
+  </button>
+  <div class="ms-auto fs-5 fw-bold" style="color:var(--gold-500)">✦ لوحة التحكم</div>
+  <button class="theme-toggle ms-3" aria-label="تبديل الوضع الليلي" style="width:36px;height:36px;font-size:0.95rem;">
+    <i class="bi bi-sun"></i>
+    <i class="bi bi-moon-stars"></i>
+  </button>
+</nav>
+
+<div class="mobile-overlay" id="mobile-overlay" onclick="toggleSidebar()"></div>
+
+<!-- ── SIDEBAR ── -->
+<aside class="sidebar" id="sidebar" style="display:none">
+  <div class="sidebar-brand">
+    <div class="fs-4 fw-bold">✦ لوحة التحكم</div>
+    <small class="text-muted">إدارة معرض أعمال رضوى محمد</small>
+  </div>
+  <nav class="mt-4 flex-grow-1">
+    <a class="nav-item active" onclick="showSection('articles',event)">
+      <i class="bi bi-file-earmark-richtext"></i> المقالات الصحفية
+    </a>
+    <a class="nav-item" onclick="showSection('media',event)">
+      <i class="bi bi-play-circle"></i> الوسائط المتعددة
+    </a>
+    <a class="nav-item" onclick="showSection('overview',event)">
+      <i class="bi bi-speedometer2"></i> إحصائيات عامة
+    </a>
+    <a href="index.html" class="nav-item">
+      <i class="bi bi-house-heart"></i> عرض الموقع
+    </a>
+  </nav>
+  <div class="p-4 border-top">
+    <div class="small text-muted mb-3" id="user-email"></div>
+    <button class="btn-send w-100 py-2" onclick="logout()">
+      <i class="bi bi-box-arrow-right me-2"></i> تسجيل الخروج
+    </button>
+  </div>
+</aside>
+
+<!-- ── MAIN CONTENT ── -->
+<main class="main" id="main-content" style="display:none">
+  <div class="d-flex align-items-center justify-content-between mb-5">
+    <h1 class="page-title" id="section-title">المقالات</h1>
+    <div class="d-flex align-items-center gap-3">
+      <button class="theme-toggle" aria-label="تبديل الوضع الليلي">
+        <i class="bi bi-sun"></i>
+        <i class="bi bi-moon-stars"></i>
+      </button>
+      <div class="user-pill d-none d-md-flex align-items-center gap-2 px-3 py-2">
+        <i class="bi bi-person-circle"></i>
+        <span id="user-pill-email"></span>
+      </div>
+    </div>
+  </div>
+
+  <!-- STATS -->
+  <div class="row g-4 mb-5" id="stats-row">
+    <div class="col-md-4">
+      <div class="stat-card">
+        <div class="stat-icon bg-warning-subtle text-warning"><i class="bi bi-journal-text"></i></div>
+        <div>
+          <div class="stat-num" id="count-articles">—</div>
+          <div class="stat-label">مقال منشور</div>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-4">
+      <div class="stat-card">
+        <div class="stat-icon bg-info-subtle text-info"><i class="bi bi-mic"></i></div>
+        <div>
+          <div class="stat-num" id="count-audio">—</div>
+          <div class="stat-label">بودكاست صوتي</div>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-4">
+      <div class="stat-card">
+        <div class="stat-icon bg-success-subtle text-success"><i class="bi bi-camera-video"></i></div>
+        <div>
+          <div class="stat-num" id="count-video">—</div>
+          <div class="stat-label">تقرير مرئي</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SECTIONS -->
+  <div id="section-articles">
+    <div class="row g-4">
+      <div class="col-lg-5">
+        <div class="panel">
+          <h3 class="panel-title"><i class="bi bi-plus-circle me-2"></i> نشر مقال جديد</h3>
+          <div class="mb-3">
+            <label>عنوان المقال</label>
+            <input type="text" class="form-control" id="art-title" placeholder="اكتبي العنوان هنا..." />
+          </div>
+          <div class="mb-3">
+            <label>المحتوى</label>
+            <textarea class="form-control" id="art-content" placeholder="اكتبي نص المقال كاملاً..." style="height: 200px;"></textarea>
+          </div>
+          <div class="mb-4">
+            <label>تاريخ النشر</label>
+            <input type="date" class="form-control" id="art-date" />
+          </div>
+          <button class="btn-publish w-100 py-3" id="art-btn" onclick="publishArticle()">
+            <i class="bi bi-send-check me-2"></i> نشر الآن
+          </button>
+        </div>
+      </div>
+      <div class="col-lg-7">
+        <div class="panel">
+          <h3 class="panel-title">المقالات المنشورة</h3>
+          <div class="table-responsive">
+            <table class="recent-table w-100">
+              <thead>
+                <tr>
+                  <th>العنوان</th>
+                  <th>التاريخ</th>
+                  <th>إجراء</th>
+                </tr>
+              </thead>
+              <tbody id="articles-table-body"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div id="section-media" style="display:none">
+    <div class="row g-4">
+      <div class="col-lg-5">
+        <div class="panel">
+          <h3 class="panel-title"><i class="bi bi-plus-circle me-2"></i> إضافة وسائط جديدة</h3>
+          <div class="mb-3">
+            <label>نوع المحتوى</label>
+            <div class="btn-group w-100" role="group">
+              <input type="radio" class="btn-check" name="mtype" id="type-video" checked>
+              <label class="btn btn-outline-warning py-2" for="type-video"><i class="bi bi-play-btn me-2"></i>فيديو</label>
+              <input type="radio" class="btn-check" name="mtype" id="type-audio">
+              <label class="btn btn-outline-warning py-2" for="type-audio"><i class="bi bi-mic me-2"></i>صوت</label>
+            </div>
+          </div>
+          <div class="mb-3">
+            <label>العنوان</label>
+            <input type="text" class="form-control" id="med-title" placeholder="عنوان الفيديو أو البودكاست..." />
+          </div>
+          <div class="mb-4">
+            <label id="url-label">رابط YouTube</label>
+            <input type="url" class="form-control" id="med-url" placeholder="https://..." />
+          </div>
+          <button class="btn-publish w-100 py-3" id="med-btn" onclick="publishMedia()">
+            <i class="bi bi-cloud-upload me-2"></i> حفظ الوسائط
+          </button>
+        </div>
+      </div>
+      <div class="col-lg-7">
+        <div class="panel">
+          <h3 class="panel-title">قائمة الوسائط</h3>
+          <div class="table-responsive">
+            <table class="recent-table w-100">
+              <thead>
+                <tr>
+                  <th>العنوان</th>
+                  <th>النوع</th>
+                  <th>إجراء</th>
+                </tr>
+              </thead>
+              <tbody id="media-table-body"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div id="section-overview" style="display:none">
+    <div class="panel text-center py-5">
+      <i class="bi bi-activity fs-1 text-warning mb-4 d-block"></i>
+      <h2>نظرة عامة على نشاطك</h2>
+      <p class="text-muted">سيتم هنا عرض تحليلات متقدمة لزيارات معرض أعمالك قريباً.</p>
+    </div>
+  </div>
+</main>
+
+<div class="toast-container position-fixed bottom-0 start-50 translate-middle-x p-3">
+  <div id="liveToast" class="toast align-items-center text-white bg-dark border-0" role="alert" aria-live="assertive" aria-atomic="true">
+    <div class="d-flex">
+      <div class="toast-body" id="toast-text"></div>
+      <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+  const SUPA_URL = "https://twattauclrkwwpkortuh.supabase.co";
+  const SUPA_KEY = "sb_publishable_-tCeu115o7OPnomReJJsvA_dlbWAVAx";
+  const { createClient } = supabase;
+  const db = createClient(SUPA_URL, SUPA_KEY);
+
+  // AUTH LOGIC
+  async function bootDashboard() {
+    const { data: { session } } = await db.auth.getSession();
+    if (!session) {
+      window.location.replace('login.html');
+      return;
+    }
+    
+    document.getElementById('auth-gate').style.display = 'none';
+    document.getElementById('sidebar').style.display = 'flex';
+    document.getElementById('main-content').style.display = 'block';
+    document.getElementById('mobile-topbar').style.display = 'flex';
+    
+    const email = session.user.email;
+    document.getElementById('user-email').innerText = email;
+    document.getElementById('user-pill-email').innerText = email;
+    
+    loadStats();
+    loadArticlesTable();
+    loadMediaTable();
+  }
+
+  function toggleSidebar() {
+    document.getElementById('sidebar').classList.toggle('open');
+    document.getElementById('mobile-overlay').classList.toggle('open');
+  }
+
+  async function logout() {
+    await db.auth.signOut();
+    window.location.replace('login.html');
+  }
+
+  // NAVIGATION
+  function showSection(id, e) {
+    if (e) {
+      document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
+      e.currentTarget.classList.add('active');
+    }
+    
+    ['articles', 'media', 'overview'].forEach(s => {
+      document.getElementById(`section-${s}`).style.display = (s === id) ? 'block' : 'none';
+    });
+    
+    const titles = { articles: 'المقالات الصحفية', media: 'الوسائط المتعددة', overview: 'الإحصائيات العامة' };
+    document.getElementById('section-title').innerText = titles[id];
+    
+    if (window.innerWidth <= 1024) toggleSidebar();
+  }
+
+  // CRUD HELPERS
+  async function loadStats() {
+    const { count: artCount } = await db.from('articles').select('*', { count: 'exact', head: true });
+    const { data: media } = await db.from('media').select('type');
+    
+    document.getElementById('count-articles').innerText = artCount || 0;
+    document.getElementById('count-audio').innerText = media?.filter(m => m.type === 'audio').length || 0;
+    document.getElementById('count-video').innerText = media?.filter(m => m.type === 'video').length || 0;
+  }
+
+  async function loadArticlesTable() {
+    const { data } = await db.from('articles').select('*').order('date', { ascending: false });
+    const tbody = document.getElementById('articles-table-body');
+    tbody.innerHTML = data?.map(a => `
+      <tr>
+        <td class="fw-bold">${a.title}</td>
+        <td>${new Date(a.date).toLocaleDateString('ar-EG')}</td>
+        <td><button class="btn btn-sm btn-outline-danger" onclick="deleteRow('articles', '${a.id}')"><i class="bi bi-trash"></i></button></td>
+      </tr>
+    `).join('') || '<tr><td colspan="3" class="text-center py-4">لا توجد بيانات</td></tr>';
+  }
+
+  async function loadMediaTable() {
+    const { data } = await db.from('media').select('*').order('created_at', { ascending: false });
+    const tbody = document.getElementById('media-table-body');
+    tbody.innerHTML = data?.map(m => `
+      <tr>
+        <td class="fw-bold">${m.title}</td>
+        <td><span class="badge ${m.type==='video'?'bg-danger-subtle text-danger':'bg-primary-subtle text-primary'}">${m.type==='video'?'فيديو':'صوت'}</span></td>
+        <td><button class="btn btn-sm btn-outline-danger" onclick="deleteRow('media', '${m.id}')"><i class="bi bi-trash"></i></button></td>
+      </tr>
+    `).join('') || '<tr><td colspan="3" class="text-center py-4">لا توجد بيانات</td></tr>';
+  }
+
+  async function publishArticle() {
+    const title = document.getElementById('art-title').value.trim();
+    const content = document.getElementById('art-content').value.trim();
+    const date = document.getElementById('art-date').value;
+    const btn = document.getElementById('art-btn');
+
+    if (!title || !content || !date) return showToast('يرجى تعبئة جميع الحقول', true);
+
+    btn.disabled = true;
+    const { error } = await db.from('articles').insert([{ title, content, date }]);
+    btn.disabled = false;
+
+    if (!error) {
+      showToast('تم نشر المقال بنجاح');
+      document.getElementById('art-title').value = '';
+      document.getElementById('art-content').value = '';
+      loadArticlesTable();
+      loadStats();
+    } else {
+      showToast('حدث خطأ أثناء النشر', true);
+    }
+  }
+
+  async function publishMedia() {
+    const title = document.getElementById('med-title').value.trim();
+    const url = document.getElementById('med-url').value.trim();
+    const type = document.getElementById('type-video').checked ? 'video' : 'audio';
+    const btn = document.getElementById('med-btn');
+
+    if (!title || !url) return showToast('يرجى تعبئة جميع الحقول', true);
+
+    btn.disabled = true;
+    const { error } = await db.from('media').insert([{ title, url, type }]);
+    btn.disabled = false;
+
+    if (!error) {
+      showToast('تم حفظ الوسائط بنجاح');
+      document.getElementById('med-title').value = '';
+      document.getElementById('med-url').value = '';
+      loadMediaTable();
+      loadStats();
+    } else {
+      showToast('حدث خطأ أثناء الحفظ', true);
+    }
+  }
+
+  async function deleteRow(table, id) {
+    if (!confirm('هل أنتِ متأكدة من حذف هذا العنصر؟')) return;
+    const { error } = await db.from(table).delete().eq('id', id);
+    if (!error) {
+      showToast('تم الحذف بنجاح');
+      table === 'articles' ? loadArticlesTable() : loadMediaTable();
+      loadStats();
+    }
+  }
+
+  function showToast(msg, isError = false) {
+    const toastEl = document.getElementById('liveToast');
+    const textEl = document.getElementById('toast-text');
+    textEl.innerText = msg;
+    toastEl.className = `toast align-items-center text-white border-0 ${isError ? 'bg-danger' : 'bg-success'}`;
+    new bootstrap.Toast(toastEl).show();
+  }
+
+  document.getElementById('type-video').onchange = () => document.getElementById('url-label').innerText = 'رابط YouTube';
+  document.getElementById('type-audio').onchange = () => document.getElementById('url-label').innerText = 'رابط الملف الصوتي (URL)';
+
+  bootDashboard();
+</script>
+<script src="assets/motion.js"></script>
+</body>
+</html>

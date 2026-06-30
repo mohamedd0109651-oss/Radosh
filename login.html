@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>تسجيل الدخول | Radwa Mohamed</title>
+
+  <!-- Persistent Theme (applied before paint to avoid flash) -->
+  <script src="assets/theme-init.js"></script>
+  
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700&family=Playfair+Display:wght@600;700&display=swap" rel="stylesheet" />
+  
+  <!-- Bootstrap 5 RTL -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.rtl.min.css" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" />
+
+  <!-- Pearl & Liquid Gold Design System -->
+  <link rel="stylesheet" href="assets/theme.css" />
+
+  <style>
+    body {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      margin: 0;
+    }
+    .login-wrap {
+      width: 100%;
+      max-width: 450px;
+      padding: 4rem 3rem;
+      text-align: center;
+    }
+    .login-logo {
+      font-size: 2.2rem;
+      margin-bottom: 0.5rem;
+    }
+    .gold-bar {
+      width: 50px; height: 3px;
+      background: linear-gradient(90deg, var(--gold-200), var(--gold-400));
+      margin: 1.5rem auto 2.5rem;
+      border-radius: 5px;
+    }
+    label {
+      text-align: right;
+      width: 100%;
+      margin-bottom: 0.6rem;
+      font-weight: 700;
+      color: var(--charcoal-ink);
+    }
+    .form-control {
+      padding: 0.85rem 1.2rem;
+      font-size: 1rem;
+      margin-bottom: 1.5rem;
+    }
+    .back-link {
+      display: inline-block;
+      margin-top: 2rem;
+      color: var(--muted-ink);
+      text-decoration: none;
+      font-weight: 600;
+      transition: color 0.3s;
+    }
+    .back-link:hover { color: var(--gold-500); }
+    
+    .alert-err {
+      background: #fff5f5;
+      border: 1px solid #feb2b2;
+      color: #c53030;
+      padding: 1rem;
+      border-radius: 12px;
+      margin-bottom: 1.5rem;
+      display: none;
+      font-size: 0.9rem;
+      font-weight: 600;
+    }
+  </style>
+</head>
+<body>
+
+  <button class="theme-toggle theme-toggle-floating" aria-label="تبديل الوضع الليلي">
+    <i class="bi bi-sun"></i>
+    <i class="bi bi-moon-stars"></i>
+  </button>
+
+  <div class="login-wrap">
+    <div class="login-logo">لوحة الإدارة ✦</div>
+    <div class="gold-bar"></div>
+    <p class="text-muted mb-5">أدخلي بياناتك للوصول إلى لوحة التحكم الخاصة بكِ</p>
+
+    <div id="login-form">
+      <div class="mb-3">
+        <label for="email">البريد الإلكتروني</label>
+        <input type="email" id="email" class="form-control" placeholder="admin@example.com" autocomplete="email" />
+      </div>
+      <div class="mb-4">
+        <label for="password">كلمة المرور</label>
+        <input type="password" id="password" class="form-control" placeholder="••••••••" autocomplete="current-password" />
+      </div>
+      
+      <div class="alert-err" id="err-msg">
+        <i class="bi bi-exclamation-circle-fill me-2"></i>
+        <span id="err-text">بيانات الدخول غير صحيحة</span>
+      </div>
+
+      <button class="btn-login w-100 py-3" id="login-btn" onclick="doLogin()">
+        <span id="btn-label">تسجيل الدخول</span>
+        <span id="btn-spinner" class="spinner-border spinner-border-sm ms-2 d-none" role="status"></span>
+      </button>
+    </div>
+
+    <a href="index.html" class="back-link">
+      <i class="bi bi-arrow-right me-2"></i>العودة للموقع الرئيسي
+    </a>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script>
+    const SUPA_URL = "https://twattauclrkwwpkortuh.supabase.co";
+    const SUPA_KEY = "sb_publishable_-tCeu115o7OPnomReJJsvA_dlbWAVAx";
+    const { createClient } = supabase;
+
+    const db = createClient(SUPA_URL, SUPA_KEY, {
+      auth: {
+        storage: window.localStorage,
+        autoRefreshToken: true,
+        persistSession: true,
+        detectSessionInUrl: true,
+        flowType: 'implicit'
+      }
+    });
+
+    db.auth.onAuthStateChange((event, session) => {
+      if (session) window.location.replace('dashboard.html');
+    });
+
+    db.auth.getSession().then(({ data }) => {
+      if (data.session) window.location.replace('dashboard.html');
+    });
+
+    async function doLogin() {
+      const email    = document.getElementById('email').value.trim();
+      const password = document.getElementById('password').value;
+      const btn      = document.getElementById('login-btn');
+      const label    = document.getElementById('btn-label');
+      const spinner  = document.getElementById('btn-spinner');
+
+      if (!email || !password) { showErr('يرجى تعبئة جميع الحقول'); return; }
+
+      btn.disabled = true;
+      label.textContent = 'جارٍ التحقق...';
+      spinner.classList.remove('d-none');
+      document.getElementById('err-msg').style.display = 'none';
+
+      const { data, error } = await db.auth.signInWithPassword({ email, password });
+
+      if (error) {
+        btn.disabled = false;
+        label.textContent = 'تسجيل الدخول';
+        spinner.classList.add('d-none');
+        showErr('البريد الإلكتروني أو كلمة المرور غير صحيحة');
+      }
+    }
+
+    function showErr(msg) {
+      document.getElementById('err-text').textContent = msg;
+      document.getElementById('err-msg').style.display = 'block';
+    }
+
+    document.addEventListener('keydown', e => { if (e.key === 'Enter') doLogin(); });
+  </script>
+  <script src="assets/motion.js"></script>
+</body>
+</html>
