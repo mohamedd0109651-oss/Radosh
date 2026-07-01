@@ -100,7 +100,7 @@
       border-radius: 50%;
       display: flex; align-items: center; justify-content: center;
       font-size: 1.6rem;
-      padding-left: 4px;
+      padding-left: 4px; /* Align play icon triangle */
       box-shadow: 0 8px 20px var(--gold-glow);
       transition: all 0.3s var(--ease-luxury);
     }
@@ -124,7 +124,9 @@
     .modal-body { font-size: 1.1rem; line-height: 1.8; color: var(--charcoal-ink); }
     .btn-close { background-color: var(--gold-100); border-radius: 50%; padding: 0.8rem; opacity: 0.8; }
 
-    /* MEDIA FILTER + LIVE SEARCH */
+    /* ============================================================
+       MEDIA FILTER + LIVE SEARCH (Mobile Optimization Fix)
+       ============================================================ */
     .media-controls {
       display: flex;
       flex-wrap: wrap;
@@ -140,7 +142,7 @@
       -webkit-overflow-scrolling: touch;
       scrollbar-width: none;
       padding: 0.4rem 0.2rem;
-      width: 100%;
+      width: 100%; /* Default full width for clean horizontal scrolling */
     }
     .media-filter-row::-webkit-scrollbar { display: none; }
     .media-filter-pill {
@@ -213,7 +215,9 @@
     .media-col { will-change: transform, opacity; }
     .media-hidden { display: none !important; }
 
-    /* IMPACT ANALYTICS COUNTER */
+    /* ============================================================
+       IMPACT ANALYTICS COUNTER (Part 3 — Focused 2-Card Edition)
+       ============================================================ */
     .impact-stats { padding: 2.5rem 0 0.5rem; position: relative; z-index: 1; }
     .impact-stats-row {
       max-width: 760px;
@@ -390,11 +394,11 @@
     <div class="row row-cols-2 g-3 g-md-4 impact-stats-row">
       <div class="col">
         <div class="impact-stat-card stat-card">
-          <div class="impact-stat-icon"><i class="bi bi-collection-play"></i></div>
+          <div class="impact-stat-icon"><i class="bi bi-newspaper"></i></div>
           <div class="impact-stat-number">
-            <span class="impact-count" id="statReportsCount" data-target="0">0</span><span class="impact-suffix" id="statReportsSuffix"></span>
+            <span class="impact-count" id="statReportsCount" data-target="100">0</span><span class="impact-suffix" id="statReportsSuffix">+</span>
           </div>
-          <p class="impact-stat-label">إجمالي الأعمال المنشورة</p>
+          <p class="impact-stat-label">تقرير ومقال منشور</p>
         </div>
       </div>
       <div class="col">
@@ -444,4 +448,459 @@
     <div class="row g-4" id="articles-grid">
       <div class="col-md-4"><div class="skeleton" style="height:350px;"></div></div>
       <div class="col-md-4"><div class="skeleton" style="height:350px;"></div></div>
-      <div class="col-md-4"><div class="skeleton" style="
+      <div class="col-md-4"><div class="skeleton" style="height:350px;"></div></div>
+    </div>
+  </div>
+</section>
+
+<section id="media" style="padding: 8rem 0;">
+  <div class="container">
+    <div class="text-center mb-5">
+      <p class="section-sub text-uppercase fw-bold ls-2">المحتوى الخاص بالاذاعة</p>
+      <h2 class="section-label">الإذاعة والتلفزيون</h2>
+      <div class="gold-divider"></div>
+    </div>
+
+    <div class="media-controls">
+      <div class="media-filter-row" id="mediaFilterRow" role="tablist" aria-label="تصفية المحتوى">
+        <button type="button" class="media-filter-pill active" data-category="all" role="tab" aria-selected="true">الكل</button>
+        <button type="button" class="media-filter-pill" data-category="تقارير مرئية" role="tab" aria-selected="false">تقارير مرئية</button>
+        <button type="button" class="media-filter-pill" data-category="لقاءات تليفزيونية" role="tab" aria-selected="false">لقاءات تليفزيونية</button>
+        <button type="button" class="media-filter-pill" data-category="نصائح إعلامية" role="tab" aria-selected="false">نصائح إعلامية</button>
+      </div>
+      <div class="media-search-wrap">
+        <input type="text" id="mediaSearchInput" class="media-search-input" placeholder="ابحثي عن محتوى..." autocomplete="off" aria-label="بحث في المحتوى" />
+        <i class="bi bi-search media-search-icon"></i>
+      </div>
+    </div>
+
+    <div class="row g-4" id="media-grid">
+      <div class="col-6 col-md-4"><div class="skeleton" style="height:300px;"></div></div>
+      <div class="col-6 col-md-4"><div class="skeleton" style="height:300px;"></div></div>
+      <div class="col-6 col-md-4 d-none d-md-block"><div class="skeleton" style="height:300px;"></div></div>
+    </div>
+  </div>
+</section>
+
+<footer class="text-center">
+  <div class="container">
+    <div class="gold-divider"></div>
+    <p class="mb-0">جميع الحقوق محفوظة &copy; <span>Radwa Mohamed</span> 2026 — إعلامية متخصصة</p>
+  </div>
+</footer>
+
+<div class="modal fade" id="articleModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-lg modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="modalTitle"></h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <div class="modal-date mb-3" id="modalDate" style="color:var(--gold-500); font-weight:600;"></div>
+        <div id="modalBody"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="video-lightbox-overlay" id="videoLightboxOverlay">
+  <div class="video-lightbox-box">
+    <button type="button" class="video-lightbox-close" id="videoLightboxCloseBtn" aria-label="إغلاق الفيديو">
+      <i class="bi bi-x-lg"></i>
+    </button>
+    <div class="video-lightbox-frame-wrap" id="videoLightboxFrameWrap"></div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+<script>
+  const SUPA_URL = "https://twattauclrkwwpkortuh.supabase.co";
+  const SUPA_KEY = "sb_publishable_-tCeu115o7OPnomReJJsvA_dlbWAVAx";
+  const { createClient } = supabase;
+  const db = createClient(SUPA_URL, SUPA_KEY);
+
+  async function loadArticles() {
+    const grid = document.getElementById('articles-grid');
+    const { data, error } = await db.from('articles').select('*').order('date', { ascending: false });
+    
+    if (error || !data || data.length === 0) {
+      grid.innerHTML = '<div class="col-12 text-center py-5 opacity-50"><i class="bi bi-feather fs-1 d-block mb-3"></i>لا توجد مقالات حالياً</div>';
+      return;
+    }
+
+    grid.innerHTML = data.map(art => `
+      <div class="col-md-4">
+        <div class="port-card h-100" onclick="openArticle('${art.id}')">
+          <div class="card-body">
+            <span class="card-date"><i class="bi bi-calendar3 me-1"></i> ${new Date(art.date).toLocaleDateString('ar-EG')}</span>
+            <h3 class="card-title">${art.title}</h3>
+            <p class="card-text">${art.content.substring(0, 120)}...</p>
+            <div class="mt-3" style="color:var(--gold-500); font-weight:700;">إقرئي المزيد <i class="bi bi-arrow-left ms-1"></i></div>
+          </div>
+        </div>
+      </div>
+    `).join('');
+
+    applyMediaFilter(true);
+  }
+
+  async function openArticle(id) {
+    const { data } = await db.from('articles').select('*').eq('id', id).single();
+    if (!data) return;
+    document.getElementById('modalTitle').innerText = data.title;
+    document.getElementById('modalDate').innerHTML = `<i class="bi bi-calendar3 me-2"></i> ${new Date(data.date).toLocaleDateString('ar-EG')}`;
+    document.getElementById('modalBody').innerText = data.content;
+    new bootstrap.Modal(document.getElementById('articleModal')).show();
+  }
+
+  async function loadMedia() {
+    const grid = document.getElementById('media-grid');
+    const { data, error } = await db.from('media').select('*').order('created_at', { ascending: false });
+
+    if (error || !data || data.length === 0) {
+      grid.innerHTML = '<div class="col-12 text-center py-5 opacity-50"><i class="bi bi-play-circle fs-1 d-block mb-3"></i>لا توجد وسائط حالياً</div>';
+      return;
+    }
+
+    grid.innerHTML = data.map(m => {
+      let content = '';
+      if (m.type === 'video') {
+        const vidId = extractYouTubeId(m.url);
+        const thumbUrl = `https://img.youtube.com/vi/${vidId}/hqdefault.jpg`;
+        content = `
+          <div class="video-glass-card mt-3" tabindex="0" role="button"
+               aria-label="تشغيل فيديو: ${escapeHtml(m.title)}"
+               onclick="openVideoLightbox('${vidId}')">
+            <img src="${thumbUrl}" alt="${escapeHtml(m.title)}" class="video-thumb" loading="lazy" />
+            <div class="video-play-btn"><i class="bi bi-play-fill"></i></div>
+          </div>`;
+      } else {
+        content = `<audio controls class="w-100 mt-3"><source src="${m.url}" type="audio/mpeg"></audio>`;
+      }
+
+      const mediaCategory = getMediaCategory(m);
+      const mediaTitleAttr = escapeHtml(String(m.title ?? '').toLowerCase());
+
+      return `
+        <div class="col-12 col-sm-6 col-md-4 media-col" data-category="${escapeHtml(mediaCategory)}" data-title="${mediaTitleAttr}">
+          <div class="media-card h-100 p-4">
+            <div class="media-icon ${m.type === 'video' ? 'badge-video' : 'badge-audio'}">
+              <i class="bi bi-${m.type === 'video' ? 'play-btn' : 'mic'}"></i>
+            </div>
+            <h4 class="media-title">${m.title}</h4>
+            <span class="badge rounded-pill ${m.type === 'video' ? 'bg-danger-subtle text-danger' : 'bg-primary-subtle text-primary'} px-3 py-2">
+              ${m.type === 'video' ? 'تقرير مرئي' : 'بودكاست صوتي'}
+            </span>
+            ${content}
+          </div>
+        </div>
+      `;
+    }).join('');
+
+    if (!document.getElementById('mediaEmptyState')) {
+      grid.insertAdjacentHTML('beforeend', `
+        <div id="mediaEmptyState" class="col-12 text-center py-5 opacity-50 media-hidden">
+          <i class="bi bi-search fs-1 d-block mb-3"></i>لا توجد نتائج مطابقة لبحثك
+        </div>`);
+    }
+
+    applyMediaFilter(true);
+  }
+
+  function getMediaCategory(m) {
+    const MEDIA_KNOWN_CATEGORIES = ['تقارير مرئية', 'لقاءات تليفزيونية', 'نصائح إعلامية'];
+    if (m.category && MEDIA_KNOWN_CATEGORIES.includes(m.category)) return m.category;
+    return m.type === 'video' ? 'تقارير مرئية' : 'نصائح إعلامية';
+  }
+
+  function applyMediaFilter(skipAnimation) {
+    const mediaGrid = document.getElementById('media-grid');
+    const articlesGrid = document.getElementById('articles-grid');
+    const searchTerm = currentMediaSearch.trim().toLowerCase();
+
+    // 1) تصفية قسم الإذاعة والتلفزيون (الوسائط)
+    if (mediaGrid) {
+      const cards = Array.from(mediaGrid.querySelectorAll('.media-col'));
+      if (cards.length > 0) {
+        cards.forEach(card => {
+          const matchesCategory = currentMediaCategory === 'all' || card.dataset.category === currentMediaCategory;
+          const matchesSearch = !searchTerm || card.dataset.title.includes(searchTerm);
+          card.dataset.match = (matchesCategory && matchesSearch) ? '1' : '0';
+        });
+
+        const matched = cards.filter(c => c.dataset.match === '1');
+        const unmatched = cards.filter(c => c.dataset.match === '0');
+        const emptyState = document.getElementById('mediaEmptyState');
+
+        if (skipAnimation) {
+          matched.forEach(c => mediaGrid.appendChild(c));
+          unmatched.forEach(c => mediaGrid.appendChild(c));
+          matched.forEach(c => c.classList.remove('media-hidden'));
+          unmatched.forEach(c => c.classList.add('media-hidden'));
+          if (emptyState) {
+            emptyState.classList.toggle('media-hidden', matched.length !== 0);
+          }
+        } else {
+          /* FLIP animation */
+          const firstRects = new Map();
+          matched.forEach(card => {
+            if (!card.classList.contains('media-hidden')) {
+              firstRects.set(card, card.getBoundingClientRect());
+            }
+          });
+
+          unmatched.forEach(card => card.classList.add('media-hidden'));
+          matched.forEach(c => mediaGrid.appendChild(c));
+          matched.forEach(c => c.classList.remove('media-hidden'));
+
+          if (emptyState) mediaGrid.appendChild(emptyState);
+
+          matched.forEach(card => {
+            const last = card.getBoundingClientRect();
+            const first = firstRects.get(card);
+            card.style.transition = 'none';
+            if (first) {
+              const dx = first.left - last.left;
+              const dy = first.top - last.top;
+              card.style.transform = `translate3d(${dx}px, ${dy}px, 0)`;
+              card.style.opacity = '1';
+            } else {
+              card.style.transform = 'translate3d(0,0,0) scale(0.88)';
+              card.style.opacity = '0';
+            }
+          });
+
+          void mediaGrid.offsetHeight;
+
+          requestAnimationFrame(() => {
+            matched.forEach(card => {
+              card.style.transition = 'transform 0.5s cubic-bezier(0.22,1,0.36,1), opacity 0.4s ease';
+              card.style.transform = 'translate3d(0,0,0)';
+              card.style.opacity = '1';
+            });
+          });
+
+          setTimeout(() => {
+            matched.forEach(card => {
+              card.style.transition = '';
+              card.style.transform = '';
+              card.style.opacity = '';
+            });
+          }, 520);
+
+          if (emptyState) {
+            emptyState.classList.toggle('media-hidden', matched.length !== 0);
+          }
+        }
+      }
+    }
+
+    // 2) التعديل الموحد المتزامن لتصفية قسم المقالات
+    if (articlesGrid) {
+      const articleCards = Array.from(articlesGrid.querySelectorAll('#articles-grid > div:not(#articlesEmptyState)'));
+      let matchedArticlesCount = 0;
+
+      articleCards.forEach(card => {
+        const titleEl = card.querySelector('.card-title');
+        const contentEl = card.querySelector('.card-text');
+        
+        const titleText = titleEl ? titleEl.innerText.toLowerCase() : '';
+        const contentText = contentEl ? contentEl.innerText.toLowerCase() : '';
+
+        if (!searchTerm || titleText.includes(searchTerm) || contentText.includes(searchTerm)) {
+          card.classList.remove('media-hidden');
+          matchedArticlesCount++;
+        } else {
+          card.classList.add('media-hidden');
+        }
+      });
+
+      let articleEmptyState = document.getElementById('articlesEmptyState');
+      if (!articleEmptyState && articleCards.length > 0) {
+        articlesGrid.insertAdjacentHTML('beforeend', `
+          <div id="articlesEmptyState" class="col-12 text-center py-5 opacity-50 media-hidden">
+            <i class="bi bi-feather fs-1 d-block mb-3"></i>لا توجد مقالات مطابقة لبحثك
+          </div>`);
+        articleEmptyState = document.getElementById('articlesEmptyState');
+      }
+      
+      if (articleEmptyState) {
+        articleEmptyState.classList.toggle('media-hidden', matchedArticlesCount !== 0);
+      }
+    }
+  }
+
+  function extractYouTubeId(url) {
+    if (!url) return '';
+    if (url.includes('v=')) return url.split('v=')[1].split('&')[0];
+    if (url.includes('youtu.be/')) return url.split('youtu.be/')[1].split('?')[0];
+    return url.split('/').pop();
+  }
+
+  function escapeHtml(str) {
+    return String(str ?? '').replace(/[&<>"']/g, (s) => ({
+      '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
+    }[s]));
+  }
+
+  function openVideoLightbox(vidId) {
+    const overlay = document.getElementById('videoLightboxOverlay');
+    const frameWrap = document.getElementById('videoLightboxFrameWrap');
+    frameWrap.innerHTML = `
+      <div class="ratio ratio-16x9">
+        <iframe src="https://www.youtube.com/embed/${vidId}?autoplay=1&rel=0"
+                title="Video Player"
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                allowfullscreen></iframe>
+      </div>`;
+    overlay.classList.add('active');
+    document.body.style.overflow = 'hidden';
+  }
+
+  function closeVideoLightbox() {
+    const overlay = document.getElementById('videoLightboxOverlay');
+    const frameWrap = document.getElementById('videoLightboxFrameWrap');
+    overlay.classList.remove('active');
+    document.body.style.overflow = '';
+    setTimeout(() => { frameWrap.innerHTML = ''; }, 400);
+  }
+
+  /* ============================================================
+     ANIMATED COUNTER LOGIC (Fixed & Real Count From 2500)
+     ============================================================ */
+  function animateImpactCounter(el, suffixEl, target, duration) {
+    if (el.dataset.counted === 'true') return;
+    el.dataset.counted = 'true';
+
+    const startTime = performance.now();
+    suffixEl.textContent = '+';
+
+    const step = (now) => {
+      const progress = Math.min((now - startTime) / duration, 1);
+      const eased = 1 - Math.pow(1 - progress, 3);
+      const current = Math.floor(eased * target);
+
+      if (progress < 1) {
+        el.textContent = current;
+        requestAnimationFrame(step);
+      } else {
+        el.textContent = target;
+      }
+    };
+    requestAnimationFrame(step);
+  }
+
+  function observeAndAnimate(el, suffixEl, target, duration) {
+    if ('IntersectionObserver' in window) {
+      const obs = new IntersectionObserver((entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            animateImpactCounter(el, suffixEl, target, duration);
+            obs.unobserve(entry.target);
+          }
+        });
+      }, { threshold: 0.2 });
+      obs.observe(el);
+    } else {
+      animateImpactCounter(el, suffixEl, target, duration);
+    }
+  }
+
+  async function registerAndCountVisits() {
+    try {
+      const alreadyLogged = sessionStorage.getItem('visitLogged') === 'true';
+      if (!alreadyLogged) {
+        await db.from('site_visits').insert({});
+        sessionStorage.setItem('visitLogged', 'true');
+      }
+    } catch (e) { console.warn('site_visits skipped:', e); }
+
+    try {
+      const { count, error } = await db.from('site_visits').select('*', { count: 'exact', head: true });
+      const baseVisits = 2500;
+      if (error || !count) return baseVisits;
+      return baseVisits + count;
+    } catch (e) { return 2500; }
+  }
+
+  async function countPublishedReports() {
+    try {
+      const { count, error } = await db.from('articles').select('*', { count: 'exact', head: true });
+      const baseReports = 100;
+      if (error || !count) return baseReports;
+      return baseReports + count;
+    } catch (e) { return 100; }
+  }
+
+  async function initImpactCounters() {
+    const reportsEl = document.getElementById('statReportsCount');
+    const visitorsEl = document.getElementById('statVisitorsCount');
+    if (!reportsEl || !visitorsEl) return;
+
+    const reportsSuffixEl = document.getElementById('statReportsSuffix');
+    const visitorsSuffixEl = document.getElementById('statVisitorsSuffix');
+    const DURATION = 2000;
+
+    const [reportsTotal, visitorsTotal] = await Promise.all([
+      countPublishedReports(),
+      registerAndCountVisits()
+    ]);
+
+    observeAndAnimate(reportsEl, reportsSuffixEl, reportsTotal, DURATION);
+    observeAndAnimate(visitorsEl, visitorsSuffixEl, visitorsTotal, DURATION);
+  }
+
+  let currentMediaCategory = 'all';
+  let currentMediaSearch = '';
+
+  document.addEventListener('DOMContentLoaded', () => {
+    loadArticles();
+    loadMedia();
+    initImpactCounters();
+
+    const lightboxOverlay = document.getElementById('videoLightboxOverlay');
+    const lightboxCloseBtn = document.getElementById('videoLightboxCloseBtn');
+
+    if (lightboxCloseBtn) lightboxCloseBtn.addEventListener('click', closeVideoLightbox);
+    if (lightboxOverlay) {
+      lightboxOverlay.addEventListener('click', (e) => {
+        if (e.target === lightboxOverlay) closeVideoLightbox();
+      });
+    }
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && lightboxOverlay && lightboxOverlay.classList.contains('active')) closeVideoLightbox();
+    });
+
+    const mediaFilterRow = document.getElementById('mediaFilterRow');
+    const mediaSearchInput = document.getElementById('mediaSearchInput');
+
+    if (mediaFilterRow) {
+      mediaFilterRow.addEventListener('click', (e) => {
+        const pill = e.target.closest('.media-filter-pill');
+        if (!pill) return;
+        mediaFilterRow.querySelectorAll('.media-filter-pill').forEach(p => {
+          p.classList.remove('active');
+          p.setAttribute('aria-selected', 'false');
+        });
+        pill.classList.add('active');
+        pill.setAttribute('aria-selected', 'true');
+        currentMediaCategory = pill.dataset.category;
+        applyMediaFilter(false);
+      });
+    }
+
+    if (mediaSearchInput) {
+      mediaSearchInput.addEventListener('input', (e) => {
+        currentMediaSearch = e.target.value;
+        applyMediaFilter(false);
+      });
+    }
+  });
+</script>
+
+<script src="assets/motion.js"></script>
+</body>
+</html>
