@@ -544,7 +544,7 @@
       </div>
     `).join('');
 
-    applyMediaFilter(true);
+    applyMediaFilter();
   }
 
   async function openArticle(id) {
@@ -607,7 +607,7 @@
         </div>`);
     }
 
-    applyMediaFilter(true);
+    applyMediaFilter();
   }
 
   function getMediaCategory(m) {
@@ -616,89 +616,35 @@
     return m.type === 'video' ? 'تقارير مرئية' : 'نصائح إعلامية';
   }
 
-  function applyMediaFilter(skipAnimation) {
+  function applyMediaFilter() {
     const mediaGrid = document.getElementById('media-grid');
     const articlesGrid = document.getElementById('articles-grid');
     const searchTerm = currentMediaSearch.trim().toLowerCase();
 
-    // 1) تصفية قسم الإذاعة والتلفزيون (الوسائط)
+    // 1) تصفية قسم الإذاعة والتلفزيون (الوسائط) دون تغيير مكان العناصر في الـ DOM
     if (mediaGrid) {
       const cards = Array.from(mediaGrid.querySelectorAll('.media-col'));
-      if (cards.length > 0) {
-        cards.forEach(card => {
-          const matchesCategory = currentMediaCategory === 'all' || card.dataset.category === currentMediaCategory;
-          const matchesSearch = !searchTerm || card.dataset.title.includes(searchTerm);
-          card.dataset.match = (matchesCategory && matchesSearch) ? '1' : '0';
-        });
+      let matchedMediaCount = 0;
 
-        const matched = cards.filter(c => c.dataset.match === '1');
-        const unmatched = cards.filter(c => c.dataset.match === '0');
-        const emptyState = document.getElementById('mediaEmptyState');
-
-        if (skipAnimation) {
-          matched.forEach(c => mediaGrid.appendChild(c));
-          unmatched.forEach(c => mediaGrid.appendChild(c));
-          matched.forEach(c => c.classList.remove('media-hidden'));
-          unmatched.forEach(c => c.classList.add('media-hidden'));
-          if (emptyState) {
-            emptyState.classList.toggle('media-hidden', matched.length !== 0);
-          }
+      cards.forEach(card => {
+        const matchesCategory = currentMediaCategory === 'all' || card.dataset.category === currentMediaCategory;
+        const matchesSearch = !searchTerm || card.dataset.title.includes(searchTerm);
+        
+        if (matchesCategory && matchesSearch) {
+          card.classList.remove('media-hidden');
+          matchedMediaCount++;
         } else {
-          /* FLIP animation */
-          const firstRects = new Map();
-          matched.forEach(card => {
-            if (!card.classList.contains('media-hidden')) {
-              firstRects.set(card, card.getBoundingClientRect());
-            }
-          });
-
-          unmatched.forEach(card => card.classList.add('media-hidden'));
-          matched.forEach(c => mediaGrid.appendChild(c));
-          matched.forEach(c => c.classList.remove('media-hidden'));
-
-          if (emptyState) mediaGrid.appendChild(emptyState);
-
-          matched.forEach(card => {
-            const last = card.getBoundingClientRect();
-            const first = firstRects.get(card);
-            card.style.transition = 'none';
-            if (first) {
-              const dx = first.left - last.left;
-              const dy = first.top - last.top;
-              card.style.transform = `translate3d(${dx}px, ${dy}px, 0)`;
-              card.style.opacity = '1';
-            } else {
-              card.style.transform = 'translate3d(0,0,0) scale(0.88)';
-              card.style.opacity = '0';
-            }
-          });
-
-          void mediaGrid.offsetHeight;
-
-          requestAnimationFrame(() => {
-            matched.forEach(card => {
-              card.style.transition = 'transform 0.5s cubic-bezier(0.22,1,0.36,1), opacity 0.4s ease';
-              card.style.transform = 'translate3d(0,0,0)';
-              card.style.opacity = '1';
-            });
-          });
-
-          setTimeout(() => {
-            matched.forEach(card => {
-              card.style.transition = '';
-              card.style.transform = '';
-              card.style.opacity = '';
-            });
-          }, 520);
-
-          if (emptyState) {
-            emptyState.classList.toggle('media-hidden', matched.length !== 0);
-          }
+          card.classList.add('media-hidden');
         }
+      });
+
+      const emptyState = document.getElementById('mediaEmptyState');
+      if (emptyState) {
+        emptyState.classList.toggle('media-hidden', matchedMediaCount !== 0);
       }
     }
 
-    // 2) التعديل الموحد المتزامن لتصفية قسم المقالات
+    // 2) تصفية قسم المقالات والتقارير المكتوبة بناءً على مدخل البحث
     if (articlesGrid) {
       const articleCards = Array.from(articlesGrid.querySelectorAll('#articles-grid > div:not(#articlesEmptyState)'));
       let matchedArticlesCount = 0;
@@ -888,14 +834,14 @@
         pill.classList.add('active');
         pill.setAttribute('aria-selected', 'true');
         currentMediaCategory = pill.dataset.category;
-        applyMediaFilter(false);
+        applyMediaFilter();
       });
     }
 
     if (mediaSearchInput) {
       mediaSearchInput.addEventListener('input', (e) => {
         currentMediaSearch = e.target.value;
-        applyMediaFilter(false);
+        applyMediaFilter();
       });
     }
   });
