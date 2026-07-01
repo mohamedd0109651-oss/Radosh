@@ -515,6 +515,8 @@
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+<!-- استبدل من أول هنا وحتى نهاية وسم السكريبت -->
 <script>
   const SUPA_URL = "https://twattauclrkwwpkortuh.supabase.co";
   const SUPA_KEY = "sb_publishable_-tCeu115o7OPnomReJJsvA_dlbWAVAx";
@@ -597,7 +599,6 @@
       `;
     }).join('');
 
-    /* Empty-state node for the live search / filter (Additive) */
     if (!document.getElementById('mediaEmptyState')) {
       grid.insertAdjacentHTML('beforeend', `
         <div id="mediaEmptyState" class="col-12 text-center py-5 opacity-50 media-hidden">
@@ -605,7 +606,6 @@
         </div>`);
     }
 
-    /* Apply current filter/search state (instant on first load) */
     applyMediaFilter(true);
   }
 
@@ -644,7 +644,6 @@
       return;
     }
 
-    /* FLIP animation */
     const firstRects = new Map();
     matched.forEach(card => {
       if (!card.classList.contains('media-hidden')) {
@@ -709,7 +708,6 @@
     }[s]));
   }
 
-  /* ── Premium Video Lightbox ── */
   function openVideoLightbox(vidId) {
     const overlay = document.getElementById('videoLightboxOverlay');
     const frameWrap = document.getElementById('videoLightboxFrameWrap');
@@ -733,18 +731,18 @@
   }
 
   /* ============================================================
-     ANIMATED COUNTER LOGIC (Fixed & Robust Fallback Edition)
+     ANIMATED COUNTER LOGIC (Fixed & Real Count From 2500)
      ============================================================ */
   function animateImpactCounter(el, suffixEl, target, duration) {
     if (el.dataset.counted === 'true') return;
     el.dataset.counted = 'true';
 
     const startTime = performance.now();
-    const isKValue = suffixEl.textContent.includes('K') || target === 250; 
+    suffixEl.textContent = '+';
 
     const step = (now) => {
       const progress = Math.min((now - startTime) / duration, 1);
-      const eased = 1 - Math.pow(1 - progress, 3); // easeOutCubic
+      const eased = 1 - Math.pow(1 - progress, 3);
       const current = Math.floor(eased * target);
 
       if (progress < 1) {
@@ -752,9 +750,6 @@
         requestAnimationFrame(step);
       } else {
         el.textContent = target;
-        if (isKValue && !suffixEl.textContent.includes('K')) {
-          suffixEl.textContent = 'K+';
-        }
       }
     };
     requestAnimationFrame(step);
@@ -787,15 +782,16 @@
 
     try {
       const { count, error } = await db.from('site_visits').select('*', { count: 'exact', head: true });
-      if (error || !count) return 250; // Dynamic beautiful fallback if database is empty/fresh
-      return count;
-    } catch (e) { return 250; }
+      const baseVisits = 2500;
+      if (error || !count) return baseVisits;
+      return baseVisits + count;
+    } catch (e) { return 2500; }
   }
 
   async function countPublishedReports() {
     try {
       const { count, error } = await db.from('articles').select('*', { count: 'exact', head: true });
-      if (error || !count) return 100; // Dynamic beautiful fallback if database is empty/fresh
+      if (error || !count) return 100;
       return count;
     } catch (e) { return 100; }
   }
@@ -807,7 +803,7 @@
 
     const reportsSuffixEl = document.getElementById('statReportsSuffix');
     const visitorsSuffixEl = document.getElementById('statVisitorsSuffix');
-    const DURATION = 2000; // 2 Seconds Animation
+    const DURATION = 2000;
 
     const [reportsTotal, visitorsTotal] = await Promise.all([
       countPublishedReports(),
@@ -865,6 +861,7 @@
     }
   });
 </script>
+
 <script src="assets/motion.js"></script>
 </body>
 </html>
