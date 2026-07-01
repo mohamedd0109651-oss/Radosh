@@ -216,7 +216,7 @@
     .media-hidden { display: none !important; }
 
     /* ============================================================
-       IMPACT ANALYTICS COUNTER (Part 3 — Focused 2-Card Edition)
+       IMPACT ANALYTICS COUNTER (Focused 2-Card Edition)
        ============================================================ */
     .impact-stats { padding: 2.5rem 0 0.5rem; position: relative; z-index: 1; }
     .impact-stats-row {
@@ -396,16 +396,16 @@
         <div class="impact-stat-card stat-card">
           <div class="impact-stat-icon"><i class="bi bi-newspaper"></i></div>
           <div class="impact-stat-number">
-            <span class="impact-count" id="statReportsCount" data-target="100">0</span><span class="impact-suffix" id="statReportsSuffix">+</span>
+            <span class="impact-count" id="statReportsCount" data-target="0">0</span><span class="impact-suffix" id="statReportsSuffix">+</span>
           </div>
-          <p class="impact-stat-label">تقرير ومقال منشور</p>
+          <p class="impact-stat-label">إجمالي الأعمال المنشورة والمرئية</p>
         </div>
       </div>
       <div class="col">
         <div class="impact-stat-card stat-card">
           <div class="impact-stat-icon"><i class="bi bi-people"></i></div>
           <div class="impact-stat-number">
-            <span class="impact-count" id="statVisitorsCount" data-target="250">0</span><span class="impact-suffix" id="statVisitorsSuffix">K+</span>
+            <span class="impact-count" id="statVisitorsCount" data-target="2500">0</span><span class="impact-suffix" id="statVisitorsSuffix">+</span>
           </div>
           <p class="impact-stat-label">إجمالي القراء والزوار</p>
         </div>
@@ -621,7 +621,6 @@
     const articlesGrid = document.getElementById('articles-grid');
     const searchTerm = currentMediaSearch.trim().toLowerCase();
 
-    // 1) تصفية قسم الإذاعة والتلفزيون (الوسائط)
     if (mediaGrid) {
       const cards = Array.from(mediaGrid.querySelectorAll('.media-col'));
       if (cards.length > 0) {
@@ -644,7 +643,6 @@
             emptyState.classList.toggle('media-hidden', matched.length !== 0);
           }
         } else {
-          /* FLIP animation */
           const firstRects = new Map();
           matched.forEach(card => {
             if (!card.classList.contains('media-hidden')) {
@@ -698,7 +696,6 @@
       }
     }
 
-    // 2) التعديل الموحد المتزامن لتصفية قسم المقالات
     if (articlesGrid) {
       const articleCards = Array.from(articlesGrid.querySelectorAll('#articles-grid > div:not(#articlesEmptyState)'));
       let matchedArticlesCount = 0;
@@ -769,7 +766,7 @@
   }
 
   /* ============================================================
-     ANIMATED COUNTER LOGIC (Fixed & Real Count From 2500)
+     ANIMATED COUNTER LOGIC (Updated to meet exact requests)
      ============================================================ */
   function animateImpactCounter(el, suffixEl, target, duration) {
     if (el.dataset.counted === 'true') return;
@@ -820,19 +817,27 @@
 
     try {
       const { count, error } = await db.from('site_visits').select('*', { count: 'exact', head: true });
-      const baseVisits = 2500;
+      const baseVisits = 2500; // العداد بيبدأ من 2500 زي ما طلبت بالظبط
       if (error || !count) return baseVisits;
       return baseVisits + count;
     } catch (e) { return 2500; }
   }
 
-  async function countPublishedReports() {
+  // تم التعديل هنا: دمج المقالات مع محتوى الإذاعة والتلفزيون وحساب العدد الحقيقي الصافي بدون 100
+  async function countTotalPublishedContent() {
     try {
-      const { count, error } = await db.from('articles').select('*', { count: 'exact', head: true });
-      const baseReports = 100;
-      if (error || !count) return baseReports;
-      return baseReports + count;
-    } catch (e) { return 100; }
+      const [articlesRes, mediaRes] = await Promise.all([
+        db.from('articles').select('*', { count: 'exact', head: true }),
+        db.from('media').select('*', { count: 'exact', head: true })
+      ]);
+      
+      const articlesCount = (!articlesRes.error && articlesRes.count) ? articlesRes.count : 0;
+      const mediaCount = (!mediaRes.error && mediaRes.count) ? mediaRes.count : 0;
+      
+      return articlesCount + mediaCount; // هنا هيرجع المجموع الفعلي الحقيقي ليهم بدون أي رقم إضافي أساسي
+    } catch (e) { 
+      return 0; 
+    }
   }
 
   async function initImpactCounters() {
@@ -844,12 +849,12 @@
     const visitorsSuffixEl = document.getElementById('statVisitorsSuffix');
     const DURATION = 2000;
 
-    const [reportsTotal, visitorsTotal] = await Promise.all([
-      countPublishedReports(),
+    const [contentTotal, visitorsTotal] = await Promise.all([
+      countTotalPublishedContent(),
       registerAndCountVisits()
     ]);
 
-    observeAndAnimate(reportsEl, reportsSuffixEl, reportsTotal, DURATION);
+    observeAndAnimate(reportsEl, reportsSuffixEl, contentTotal, DURATION);
     observeAndAnimate(visitorsEl, visitorsSuffixEl, visitorsTotal, DURATION);
   }
 
